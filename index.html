@@ -3,148 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>漂白水稀釋計算器</title>
+    <title>漂白水稀釋計算器 (含邏輯)</title>
     <style>
-        :root {
-            --primary-color: #007bff;
-            --bg-color: #f8f9fa;
-        }
-        body {
-            font-family: -apple-system, "Microsoft JhengHei", sans-serif;
-            background-color: var(--bg-color);
-            display: flex;
-            justify-content: center;
-            padding: 20px;
-            margin: 0;
-        }
-        .container {
-            background: white;
-            padding: 25px;
-            border-radius: 16px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
-            max-width: 450px;
-            width: 100%;
-        }
-        h2 {
-            color: var(--primary-color);
-            text-align: center;
-            margin-bottom: 25px;
-        }
-        .input-section {
-            margin-bottom: 20px;
-        }
-        label {
-            display: block;
-            margin-bottom: 10px;
-            font-weight: bold;
-            font-size: 1.1rem;
-        }
-        input {
-            width: 100%;
-            padding: 15px;
-            font-size: 1.2rem;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            box-sizing: border-box;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-        input:focus {
-            border-color: var(--primary-color);
-        }
-        .result-card {
-            background: #e7f3ff;
-            padding: 20px;
-            border-radius: 12px;
-            margin-top: 20px;
-            display: none; /* 預設隱藏 */
-        }
-        .logic-card {
-            background: #fff9e6;
-            padding: 15px;
-            border-radius: 12px;
-            margin-top: 15px;
-            font-size: 0.95rem;
-            color: #664d03;
-            border: 1px solid #ffe69c;
-            display: none;
-        }
-        .highlight {
-            color: #d93025;
-            font-size: 1.5rem;
-            font-weight: bold;
-        }
-        .error {
-            color: #d93025;
-            text-align: center;
-            font-weight: bold;
-            margin-top: 10px;
-            display: none;
-        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; justify-content: center; padding: 20px; background-color: #f0f2f5; line-height: 1.6; }
+        .card { background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-width: 500px; width: 100%; }
+        h2 { color: #1a73e8; margin-top: 0; text-align: center; }
+        .input-group { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e0e0e0; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #333; }
+        input { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 18px; transition: border-color 0.3s; }
+        input:focus { border-color: #1a73e8; outline: none; }
+        .result-box { background: #e8f4fd; padding: 20px; border-radius: 10px; border-left: 6px solid #1a73e8; margin-bottom: 20px; }
+        .logic-box { background: #fff3cd; padding: 15px; border-radius: 10px; border: 1px solid #ffeeba; font-size: 0.9rem; color: #856404; }
+        .highlight { font-size: 1.4rem; color: #d93025; font-weight: bold; }
+        .formula { font-family: "Courier New", Courier, monospace; background: #eee; padding: 2px 5px; border-radius: 3px; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>🧪 漂白水稀釋助手</h2>
+<div class="card">
+    <h2>漂白水稀釋計算器</h2>
     
-    <div class="input-section">
-        <label>原始漂白水濃度 (%)：</label>
-        <input type="number" id="c1_input" placeholder="請輸入數字 (例如: 12)" oninput="doCalculate()">
+    <div class="input-group">
+        <label>1. 原始漂白水濃度 (%)：</label>
+        <input type="number" id="originalC" placeholder="例如：12" oninput="calculate()">
     </div>
 
-    <div id="res_box" class="result-card">
-        <p style="margin: 0;">每使用 <strong>1 公升</strong> 原始液：</p>
-        <p>需額外加入：<br><span id="water_val" class="highlight">0</span> <strong>公升的水</strong></p>
-        <hr style="border: 0; border-top: 1px solid #cfe2ff;">
-        <p style="font-size: 0.9rem; margin-bottom: 0;">稀釋後總體積：<span id="total_val">0</span> L</p>
-    </div>
+    <div id="displayArea" style="display:none;">
+        <div class="result-box">
+            <p><strong>計算結果：</strong></p>
+            <p>每一公升 (1L) 原始液，需加入：<br><span id="waterNeeded" class="highlight">0</span> <b>公升的水</b></p>
+            <p>稀釋後總體積為：<span id="totalV">0</span> L</p>
+        </div>
 
-    <div id="logic_box" class="logic-card">
-        <strong>💡 計算邏輯：</strong><br>
-        1. 目標濃度：6%<br>
-        2. 體積倍數 = <span id="math_ratio"></span> 倍<br>
-        3. 公式：$V_2 = \frac{C_1 \times V_1}{C_2}$<br>
-        4. 過程：<span id="math_process"></span>
+        <div class="logic-box">
+            <strong>🧮 計算邏輯說明：</strong><br>
+            採用「稀釋前後溶質等量」原理：<br>
+            <code class="formula">C1 × V1 = C2 × V2</code><br>
+            <ul style="margin: 5px 0; padding-left: 20px;">
+                <li><span id="step1"></span></li>
+                <li><span id="step2"></span></li>
+                <li><span id="step3"></span></li>
+            </ul>
+        </div>
     </div>
-
-    <div id="error_msg" class="error">⚠️ 原始濃度必須大於 6%</div>
+    
+    <p id="errorNote" style="color: #d93025; display: none; text-align: center; font-weight: bold;">⚠️ 原始濃度必須高於 6% 才能稀釋！</p>
 </div>
 
 <script>
-function doCalculate() {
-    const c1 = parseFloat(document.getElementById('c1_input').value);
-    const c2 = 6;
-    const v1 = 1;
-
-    const resBox = document.getElementById('res_box');
-    const logicBox = document.getElementById('logic_box');
-    const errorMsg = document.getElementById('error_msg');
+function calculate() {
+    const c1 = parseFloat(document.getElementById('originalC').value);
+    const c2 = 6; // 目標
+    const v1 = 1; // 基準
+    
+    const displayArea = document.getElementById('displayArea');
+    const errorNote = document.getElementById('errorNote');
 
     if (c1 > c2) {
+        // 計算總體積 V2 = (C1 * V1) / C2
         const v2 = (c1 * v1) / c2;
         const water = v2 - v1;
 
-        // 填入數值
-        document.getElementById('water_val').innerText = water.toFixed(2);
-        document.getElementById('total_val').innerText = v2.toFixed(2);
-        
-        // 填入邏輯
-        document.getElementById('math_ratio').innerText = (c1 / c2).toFixed(2);
-        document.getElementById('math_process').innerText = `(${c1}% × 1L) ÷ 6% = ${v2.toFixed(2)}L (總體積)`;
+        // 顯示數值
+        document.getElementById('waterNeeded').innerText = water.toFixed(2);
+        document.getElementById('totalV').innerText = v2.toFixed(2);
 
-        // 顯示區塊
-        resBox.style.display = 'block';
-        logicBox.style.display = 'block';
-        errorMsg.style.display = 'none';
+        // 顯示邏輯步驟
+        document.getElementById('step1').innerText = `要把 ${c1}% 稀釋成 ${c2}%，總體積會變成原始的 ${ (c1/c2).toFixed(2) } 倍。`;
+        document.getElementById('step2').innerText = `計算總體積：(${c1}% × 1L) ÷ ${c2}% = ${v2.toFixed(2)}L`;
+        document.getElementById('step3').innerText = `需加水量：總體積 ${v2.toFixed(2)}L - 原本的 1L = ${water.toFixed(2)}L`;
+        
+        displayArea.style.display = 'block';
+        errorNote.style.display = 'none';
+    } else if (c1 <= c2 && c1 > 0) {
+        displayArea.style.display = 'none';
+        errorNote.style.display = 'block';
     } else {
-        resBox.style.display = 'none';
-        logicBox.style.display = 'none';
-        if (c1 <= c2 && c1 > 0) {
-            errorMsg.style.display = 'block';
-        } else {
-            errorMsg.style.display = 'none';
-        }
+        displayArea.style.display = 'none';
+        errorNote.style.display = 'none';
     }
 }
 </script>
